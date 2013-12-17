@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+	<head>
+		<meta charset="utf-8">
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+		<script type="text/javascript" src="jquery.xdomainajax.js"></script>	
+		<link rel="stylesheet" href="style.css">
+		<title>sfcNewsType</title>
+	</head>
+	<body body onLoad="document.form.input.focus()">
+		<div id = "wrapper">
+			<div id = "title">
+				<h1>sfcNewsType</h1>
+			</div>
+			<div id="q_area"></div>
+			<form name ="form" onsubmit="a_text(); return false;">
+				<input type="text" name ="input" id="i_text">
+			</form>
+			<div id="r_area"></div>
+		</div>
+		<script type="text/javascript">
+			var q_texts;	
+			var q_index = 1;
+			var f_c;
+			var f_c_ = 0;
+			var times = 0;
+			var correct = 0;	
+			var wrong = 0;
+			var q_element	= document.getElementById("q_area");
+			var opa = 0;
+
+			$(document).ready(function(){
+				$.ajax({
+					url: 'http://www.sfc.keio.ac.jp/top.html', 
+					type: 'GET',
+					success: function(doc) {
+						contents = $(doc.responseText).find('#news dl').text().split(/\n/);
+						q_texts = $.grep(contents, function(e){return e !== "";});			
+						q_element.innerHTML = q_texts[q_index];	
+						f_c = new Array(q_texts.length);
+						for(var i=0;i<q_texts.length;i++){
+							f_c[i] = 0;
+						}
+					}
+				});
+			});	
+
+			function a_text(){
+				var f_count = 0
+				var i_element = document.getElementById("i_text");
+				var r_element = document.getElementById("r_area");
+				var q_element = document.getElementById("q_area");
+				times ++;
+
+				if(q_texts[q_index] == i_element.value){
+					r_element.innerHTML = "OK!";
+					r_element.style.color = "#00FF00";
+					opa = 0;
+					q_index += 2;
+					correct ++;	
+					if(q_index < q_texts.length){
+						q_element.innerHTML = q_texts[q_index];
+					}else{
+						for(var i=0;i<q_texts.length;i++){
+							if(f_c[i] == 1){
+								f_c_ ++;
+							}
+						}
+						alert("正答率:"+ 100*(q_texts.length/2-f_c_)/(q_texts.length/2) +"%,失敗回数:"+ wrong +"回でした。");
+									location.reload();	
+					}
+				}else{
+					r_element.innerHTML = "NG!";
+					opa +=0.22;
+					r_element.style.color = "#FF0000";	
+					r_element.style.opacity = opa;
+					wrong ++;
+					f_c[q_index] = 1;
+				}	
+				i_element.value = null;
+			}
+		</script>
+	</body>
+</html>
